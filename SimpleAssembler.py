@@ -1,28 +1,14 @@
-def decimalbinary(n, a = 10, b = 2):
-    m = ""
-    o = 0
-    sum = 0
-    nsplit = n.split(".")
-    if len(nsplit) == 1:
-        nsplit.append("0")
-    n = nsplit[0]
-    for i in n[::-1]:
-        if i.isalpha() == True:
-            sum += ((ord(i) - 55)) * (a ** o)
-            o += 1
-        else:
-            sum += (int(i)) * (a ** o)
-            o += 1
-    while sum > 0:
-        allnos = int(sum % b)
-        if allnos >= 10 and allnos < 37:
-            allnos = chr(55 + allnos)
-        elif allnos > 36:
-            print("Cant calculate for nos greater than 36...")
-            return
-        m += str(allnos)
-        sum //= b
-    return m
+def decimalbinary(n):
+        flag=True
+        if flag==True:
+            num=int(n)
+            if num <= 255 and num >= 0:
+                ans=""
+                while num>0:
+                    r=str(num%2)
+                    ans+=r
+                    num//=2
+            return (ans[::-1])
 
 def A(op, reg1, reg2, reg3):
     return op + '00' + '0' * (3 - len(reg1)) + reg1 + reg2 + reg3
@@ -42,35 +28,183 @@ def E(op, mem):
 def F():
     return '0101000000000000'
 
-dict_ISA = {"add": "10000", "sub": '10001', 'movi': '10010', 'movr': '10011', 'ld': '10100', 'st': '10101', 'mul': '10110', 'div': '10111', 'rs': '11000', 'ls': '11001', 'xor': '11010', 'or': '11011', 'and': '11100', 'not': '11101', 'cmp': '11110', 'jmp': '11111', 'jlt': '01100', 'jgt': '01101', 'je': '01111', 'hlt': '01010'}
+dict_ISA = {"add": "10000", "sub": '10001', 'movi': '10010', 'movr': '10011', 'ld': '10100', 'st': '10101', 'mul': '10110', 'div': '10111', 'rs': '11000', 'ls': '11001', 'xor': '11010', 'or': '11011', 'and': '11100', 'not': '11101', 'cmp': '11110', 'jmp': '11111', 'jlt': '01100', 'jgt': '01101', 'je': '01111', 'hl': '01010'}
 Reg = {"R0": '000', "R1": '001', 'R2': '010', 'R3': '011', 'R4': '100', 'R5': '101', 'R6': '110', 'FLAGS': '111'}
-type_ISA = {"add": A, "sub": A, 'movi': B, 'movr': C, 'ld': D, 'st': D, 'mul': A, 'div': C, 'rs': B, 'ls': B, 'xor': A, 'or': A, 'and': A, 'not': C, 'cmp': C, 'jmp': E, 'jlt': E, 'jgt': E, 'je': E, 'hlt': F}
+type_ISA = {"add": 'A', "sub": 'A', 'movi': 'B', 'movr': 'C', 'ld': 'D', 'st': 'D', 'mul': 'A', 'div': 'C', 'rs': 'B', 'ls': 'B', 'xor': 'A', 'or': 'A', 'and': 'A', 'not': 'C', 'cmp': 'C', 'jmp': 'E', 'jlt': 'E', 'jgt': 'E', 'je': 'E', 'hl': 'F', 'var': None}
 
+error_list = []
+lista = []
+
+#ERROR HANDLING
 with open("Testcase.txt") as text:
     commands = text.readlines()
+    number = 0
     for i in range(len(commands)):
         commands[i] = commands[i][0:(len(commands[i]) - 1)].split()
-    for j in commands:
-        if j[0] == 'mov' and j[2].isnumeric() == True:
-           print(B(dict_ISA[j[0]], Reg[j[1]], decimalbinary(j[2][0:len(j[2])])))
-        elif j[0] == 'mov':
-            print(C(dict_ISA[j[0]], Reg[j[1]], Reg[j[2]]))
-        else:
-            if type_ISA[j[0]] == A:
-                print(A(dict_ISA[j[0]], Reg[j[1]], Reg[j[2]], Reg[j[3]]))
-            elif type_ISA[j[0]] == B:
-                print(B(dict_ISA[j[0]], Reg[j[1]], decimalbinary(j[2][0:len(j[2])])))
-            elif type_ISA[j[0]] == C:
-                print(C(dict_ISA[j[0]], Reg[j[1]], Reg[j[2]]))
-            elif type_ISA[j[0]] == D:
-                for i in range(len(commands)):
-                    if commands[i][1] == j[2]:
-                        break
-                print(D(dict_ISA[j[0]], Reg[j[1]], decimalbinary(str(len(commands) - i - 1))))
-            elif type_ISA[j[0]] == E:
-                for i in range(len(commands)):
-                    if commands[i][1] == j[1]:
-                        break
-                print(D(dict_ISA[j[0]], decimalbinary(str(len(commands) - i - 1))))
+        if commands[i][0]=='var':
+            number += 1
+    for k in range(len(commands)):
+        if commands[k][0] != "var":
+            break
+    var_start = k + 1
+    for j in range(len(commands)):
+        flag=0
+        """#ERROR 1- typos in instruction name
+        #Do it for register name
+        try:
+        dict_ISA[commands[j][0]]
+        except:
+        error_list.append("Instruction name or register name error")
+
+        #ERROR 2- undefined variables
+        choice=False
+        for i in range(len(commands)):
+        if commands[i][1] == commands[j][1]:
+            choice=True
+            break
+        if choice==False:
+        error_list.append("Use of undefined variable(s)")
+
+        #ERROR 3- use of undefined labels
+
+        #ERROR 8- missing halt instruction
+
+        if(commands[j][0]=='hlt'):"""
+        try:
+            if commands[j][0] == 'mov' and commands[j][2][1::].isnumeric() == True:
+                try:
+                    Reg[commands[j][1]]
+                except:
+                    error_list.append("Error at line "+str(j+1)+": "+"Instruction name or register name error\n")
+                    flag = 1
+                if Reg[commands[j][1]] == "111":
+                    error_list.append("Error at line "+str(j+1)+": "+"Illeagal use of Flags register\n")
+                    flag = 1
+                if flag == 0 and (int(commands[j][2][1::])>127 or int(commands[j][2][1::])<0):
+                    error_list.append("Error at line "+str(j+1)+": Illegal immediate values (more than 8 bits)\n")
+                    flag = 1
+                if flag != 1:
+                    lista.append(B(dict_ISA['movi'], Reg[commands[j][1]], decimalbinary(commands[j][2][1::])) + "\n")
+            elif commands[j][0] == 'mov':
+                try:
+                    Reg[commands[j][1]]
+                    Reg[commands[j][2]]
+                except:
+                    error_list.append("Error at line "+str(j+1)+": "+"Instruction name or register name error\n")
+                    flag = 1
+                if Reg[commands[j][2]] == "111":
+                    error_list.append("Error at line "+str(j+1)+": "+"Illeagal use of Flags register\n")
+                    flag = 1
+                if flag != 1:
+                    lista.append(C(dict_ISA[commands[j][0]], Reg[commands[j][1]], Reg[commands[j][2]]) + "\n")
             else:
-                print(F())
+                if commands[j][0]!='mov' and commands[j][0]!='hlt' and commands[j][0]!='var':
+                    try:
+                        dict_ISA[commands[j][0]]
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": Instruction name error\n")
+                        flag=1
+                if type_ISA[commands[j][0]] == 'A':
+                    try:
+                        Reg[commands[j][1]]
+                        Reg[commands[j][2]]
+                        Reg[commands[j][3]]
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": "+"Instruction name or register name error\n")
+                        flag = 1
+                    if Reg[commands[j][1]] == "111" or Reg[commands[j][2]] == "111" or Reg[commands[j][2]] == "111":
+                        error_list.append("Error at line "+str(j+1)+": "+"Illeagal use of Flags register\n")
+                        flag = 1
+                    '''try:
+                        for i in range (1,len(commands[j])):
+                            commands[j][i]!='FLAGS'
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": Illegal use of FLAGS register\n")
+                        flag=1'''
+                    if flag != 1:
+                        lista.append(A(dict_ISA[commands[j][0]], Reg[commands[j][1]], Reg[commands[j][2]], Reg[commands[j][3]]) + "\n")
+                if type_ISA[commands[j][0]] == 'B':
+                    try:
+                        Reg[commands[j][1]]
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": Instruction name or register name error\n")
+                        flag = 1
+                    
+                    if flag == 0 and (int(commands[j][2][1::])>127 or int(commands[j][2][1::])<0):
+                      error_list.append("Error at line "+str(j+1)+": Illegal immediate values (more than 8 bits)\n")
+                      flag = 1
+
+                    if Reg[commands[j][1]] == "111":
+                        error_list.append("Error at line "+str(j+1)+": "+"Illeagal use of Flags register\n")
+                        flag = 1
+                    '''if commands[j][1]=="FLAGS":
+                        error_list.append("Error at line "+str(j+1)+": Illegal use of FLAGS register\n")'''
+                    if flag != 1:
+                        lista.append(B(dict_ISA[commands[j][0]], Reg[commands[j][1]], decimalbinary(commands[j][2][0:len(commands[j][2])])) + "\n")
+                elif type_ISA[commands[j][0]] == 'C':
+                    try:
+                        Reg[commands[j][1]]
+                        Reg[commands[j][2]]
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": "+"Instruction name or register name error\n")
+                        flag = 1
+                    if Reg[commands[j][1]] == "111" or Reg[commands[j][2]] == "111":
+                        error_list.append("Error at line "+str(j+1)+": "+"Illeagal use of Flags register\n")
+                        flag = 1
+                    '''if commands[j][1]=="FLAGS":
+                        error_list.append("Error at line "+str(j+1)+": Illegal use of FLAGS register\n")'''
+                    if flag != 1:
+                        lista.append(C(dict_ISA[commands[j][0]], Reg[commands[j][1]], Reg[commands[j][2]])+ "\n")
+                elif type_ISA[commands[j][0]] == 'D':
+                    try:
+                        Reg[commands[j][1]]
+                    except:
+                        error_list.append("Error at line "+str(j+1)+": "+"Instruction name or register name error\n")
+                        flag = 1
+                    if Reg[commands[j][1]] == "111":
+                        error_list.append("Error at line "+str(j+1)+": "+"Illegal use of Flags register\n")
+                        flag = 1
+                    choice = False
+                    for i in range(len(commands)):
+                        if commands[i][1] == commands[j][2]:
+                            choice = True
+                            break
+                    if choice==False:
+                        error_list.append("Error at line "+str(j+1)+": "+"Use of undefined variable(s)\n")
+                    if i >= var_start:
+                        error_list.append("Error at line "+str(j+1)+": "+"Variable not declared at the beginning\n")
+                        flag = 1
+                    if flag != 1 and choice == True:
+                        lista.append(D(dict_ISA[commands[j][0]], Reg[commands[j][1]], decimalbinary(str(len(commands) - i - 1))) + "\n")
+                elif type_ISA[commands[j][0]] == 'E':
+                    choice = False
+                    for i in range(len(commands)):
+                        if commands[i][0][:-1] == commands[j][1]:
+                            choice = True
+                            break
+                    if choice==False:
+                        error_list.append("Error at line "+str(j+1)+": "+"Use of undefined label(s)\n")
+                    if i >= var_start:
+                        error_list.append("Error at line "+str(j+1)+": "+"Variable not declared at the beginning\n")
+                        flag = 1
+                    if flag != 1 and choice == True:
+                        lista.append(D(dict_ISA[commands[j][0]], decimalbinary(str(len(commands) - i - 1))) + "\n")
+                elif type_ISA[commands[j][0]] == 'F':
+                    lista.append(F() + "\n")
+        except:
+            if flag == 0:
+                error_list.append("Syntax error in line" + str(j + 1) + "\n")
+    check = False
+    for k in commands:
+        if k[0] == 'hl':
+            check = True
+            break
+    if check == False:
+        error_list.append("Missing Halt instruction\n")
+    if commands[-1][0] != 'hl':
+        error_list.append("Halt not being used as last instruction\n")
+with open("OutputText.txt", 'w') as writer:
+    if (len(error_list) == 0):
+        writer.writelines(lista)
+    else:
+        writer.writelines(error_list)
