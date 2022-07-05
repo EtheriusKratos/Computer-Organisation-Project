@@ -321,21 +321,19 @@ for j in range(len(commands)):
             if flag == 0:
                 error_list.append("Syntax error in line " + str(j + 1) + "\n")
 check = False
-for k in commands:
-    if len(k) > 0 and k[0] == 'hlt':
+for k in range(len(commands)):
+    if len(commands[k]) > 0 and commands[k][0] == 'hlt':
         check = True
         break
 if check == False:
     error_list.append("Missing Halt instruction\n")
-if commands[-1][0] != 'hlt':
-    print(list(commands[-1]))
+if commands[-1][0] != 'hlt' or k != (len(commands) - 1):
     error_list.append("Halt not being used as last instruction\n")
 
 
-with open("OutputText.txt", 'w') as writer:
-    if (len(error_list) == 0):
-        for i in lista:
-            print(i, end = "")
-    else:
-        for i in error_list:
-            print(i, end = "")
+if (len(error_list) == 0):
+    for i in lista:
+        print(i,end="")
+else:
+    for i in error_list:
+        print(i,end="")
