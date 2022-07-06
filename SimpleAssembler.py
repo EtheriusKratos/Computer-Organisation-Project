@@ -265,10 +265,13 @@ newlist = commands.copy()       # For comparing labels
 
 # adding variables to dict
 for i in range(len(commands)):
-    if commands[i][0] == 'var':
-        var[commands[i][1]] = i
-    elif(commands[i][0][-1] == ":"):
-        labels[commands[i][0][0:-1]] = i
+    try:
+        if commands[i][0] == 'var':
+            var[commands[i][1]] = i
+        elif(commands[i][0][-1] == ":"):
+            labels[commands[i][0][0:-1]] = i
+    except:
+        error_list.append('variable not declared')
 
 
 ########################## Main Code ##########################
