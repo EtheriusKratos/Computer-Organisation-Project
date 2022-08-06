@@ -130,3 +130,100 @@ def AND(x,y):
     if(type(y)==float):
         y=int(binary_to_cse(floating_to_binary((str(y)))),2)
     return x&y
+
+def NOT(x,y):
+    if(type(x)==float):
+        x=int(binary_to_cse(floating_to_binary((str(x)))),2)
+    if(type(y)==float):
+        y=int(binary_to_cse(floating_to_binary((str(y)))),2)
+    x=[i for i in bin(x)[2:].zfill(16)]
+    z=""
+    for i in range(len(x)):
+        if(x[i]=="1"):
+            x[i]="0"
+        else:
+            x[i]="1"
+        z+=x[i]
+    return int(z,2)
+def rs(x,imm):
+    if(type(x)==float):
+        x=int(binary_to_cse(floating_to_binary((str(x)))),2)
+    return x>>imm
+def ls(x,imm):
+    if(type(x)==float):
+        x=int(binary_to_cse(floating_to_binary((str(x)))),2)
+    return x<<imm
+def mov(y,x):
+    return x
+
+def movf(y,x):
+    return x
+
+
+def ld(x,mem):
+    global regs_val
+    regs_val[x]=memory[mem]
+
+def st(x,mem):
+    memory[mem]=regs_val[x]
+    
+
+def jgt(address):
+  if(regs_val[7][2]==1):
+    return(address)
+  else:
+    return -1
+def jet(address):
+  if(regs_val[7][3]==1):
+    return address
+  else:
+    return -1
+def jlt(address):
+  if(regs_val[7][1]==1):
+    return address
+  else:
+    return -1
+def jmp(address):
+  return address
+
+def hlt():
+  global halt
+  halt=True
+  return halt
+
+op_code={
+    "00000":[addf,"A",False],
+    "00001":[subf,"A",False],
+    "10000":[add,"A",False],
+    "10001":[sub,"A",False],
+    "10110":[mul,"A",False],
+    "11010":[Xor,"A",False],
+    "11011":[OR,"A",False],
+    "11100":[AND,"A",False],
+    "00010":[movf,"B",False],
+    "10010":[mov,"B",False],
+    "11000":[rs,"B",False],
+    "11001":[ls,"B",False],
+    "10011":[mov,"C",False],
+    "10111":["div","C",False],
+    "11101":[NOT,"C",False],
+    "11110":["cmp","C",True],
+    "10100":[ld,"D",False],
+    "10101":[st,"D",False],
+    "11111":[jmp,"E",False],
+    "01100":[jlt,"E",False],
+    "01101":[jgt,"E",False],
+    "01111":[jet,"E",False],
+    "01010":[hlt,"F",False],
+    
+}
+reg_code={
+    "000":0,
+    "001":1,
+    "010":2,
+    "011":3,
+    "100":4,
+    "101":5,
+    "110":6,
+    "111":7
+}
