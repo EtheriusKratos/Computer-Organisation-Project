@@ -15,7 +15,7 @@ def type_1():
         nP +=  math.log2(CPU_bits / 8)
     print("Address pins saved of required are", P-nP)
     
-    def type_2():    
+def type_2():    
     CPU_bits = int(input("Enter no of bits in CPU: "))
     pins_count = int(input("Enter the no. of address pins: "))
     change = int(input("Enter the new addressable memory option: "))
