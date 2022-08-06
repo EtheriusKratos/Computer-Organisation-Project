@@ -227,3 +227,115 @@ reg_code={
     "110":6,
     "111":7
 }
+
+def overflow(x):
+    if(x<0):
+        regs_val[7][0]=1
+        return 0
+    if(x>65535):
+        regs_val[7][0]=1
+        return x%65536
+    return x%65536
+
+def overflow_f(x):
+    if(x<0):
+        regs_val[7][0]=1
+        return 0
+    if(x>int("11111100",2)):
+        return (int("11111100",2))
+    return x
+
+
+def typea(op):
+    global op_code
+    regs_val[reg_code[op[13:]]]=op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[7:10]]])
+def typeb(op):
+    if (op_code[op[0:5]][0])==movf:
+        regs_val[reg_code[op[5:8]]]=op_code[op[0:5]][0](regs_val[reg_code[op[5:8]]],binary_to_float(cse_to_binary(op[8:])))
+    else:
+        regs_val[reg_code[op[5:8]]]=op_code[op[0:5]][0](regs_val[reg_code[op[5:8]]],int(op[8:],2))
+
+def typec(op):
+    if(op_code[op[0:5]][0])=="div":
+        div(regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[13:]]])
+    elif (op_code[op[0:5]][0])=="cmp":
+        cmp(regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[13:]]])
+    elif (op_code[op[0:5]][0])==mov and reg_code[op[10:13]]==7:
+        x=""
+        for i in regs_val[7]:
+            x+=str(i)
+        regs_val[reg_code[op[13:]]]=int(x,2)
+    else:
+        regs_val[reg_code[op[13:]]]=op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[10:13]]])
+
+def typed(op):
+        op_code[op[0:5]][0](reg_code[op[5:8]], int(op[8:],2))
+
+def typee(op):
+        return op_code[op[0:5]][0](int(op[8:],2))
+
+def typef(op):
+    op_code[op[0:5]][0]()
+
+ops=sys.stdin.readlines()
+op = []
+for i in ops:
+    i = i.strip()
+    if i!="":
+        op.append(i)
+for i in range(len(op)):
+    memory[i]=op[i]
+
+cycle=[]
+yaxis=[]
+cycle_counter=0 
+k=0
+#while(not halt):
+x=k
+while(k<len(op)and halt!=True):
+    x=-1
+    if(op_code[op[k][0:5]][1]=="A"):
+        for j in range(len(regs_val[7])):
+            regs_val[7][j]=0
+        typea(op[k])            
+    elif(op_code[op[k][0:5]][1]=="B"):
+        for j in range(len(regs_val[7])):
+                regs_val[7][j]=0
+        typeb(op[k])
+    elif(op_code[op[k][0:5]][1]=="C"):
+        typec(op[k])
+        if (op_code[op[k][0:5]][2])==False:
+            for j in range(len(regs_val[7])):
+                regs_val[7][j]=0
+        else:
+            regs_val[7][0]=0
+    elif(op_code[op[k][0:5]][1]=="D"):
+        cycle.append(cycle_counter)
+        yaxis.append(int(op[k][8:],2))
+        typed(op[k])
+        for j in range(len(regs_val[7])):
+                regs_val[7][j]=0
+    elif(op_code[op[k][0:5]][1]=="E"):
+        x=typee(op[k])
+        for j in range(len(regs_val[7])):
+                regs_val[7][j]=0
+    elif(op_code[op[k][0:5]][1]=="F"):
+        typef(op[k])
+        for j in range(len(regs_val[7])):
+                regs_val[7][j]=0 
+    print_regs(k)
+    if(x!=-1):
+        k=x
+    else:
+        k+=1
+    yaxis.append(k)
+    cycle_counter+=1
+    cycle.append(cycle_counter)
+
+memory_dump()
+x=np.array(cycle)
+y=np.array(yaxis)
+plt.scatter(x,y)
+plt.xlabel("Cycle counter")
+plt.ylabel("Memory accessed")
+plt.show()
