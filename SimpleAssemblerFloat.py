@@ -5,18 +5,27 @@ var = {}
 labels = {}
 
 def floating_to_binary(x):
+    global error_list
+    global j
     integer=int(x.split(".")[0])
     floating=int(x.split(".")[1])
     binary=str(bin(integer)[2:])+"."
     decimal="0."+str(floating)
     decimal=float(decimal)
     result=""
-    for i in range(5):
+    i=0;
+    checker=True
+    while decimal!=0.0:
         decimal=decimal*2
         result+=str(decimal).split(".")[0]
         decimal=float("."+(str(decimal).split(".")[1]))
-    return binary+result
-
+        i+=1
+        if(i>4):
+            checker=False
+            break
+    if(checker==False):
+        error_list.append("Error at line "+str(j+1)+": "+"Overflow detected\n")    
+    return binary+result+(5-len(result))*"0"
 
 def binary_to_cse(x):
     ans=""
@@ -255,6 +264,10 @@ def convert(j):
             ######## Type F ########
             elif type_ISA[commands[j][0]] == 'F':
                 lista.append(F() + "\n")
+            
+            elif type_ISA[commands[j][0]] == None:
+                if commands[j][1] in Reg.keys():
+                    error_list.append("Register used instead of variable name at " + str(j + 1) + "\n")
 
     # For Non-standard error handling
     except:
