@@ -63,13 +63,23 @@ def memory_dump():
         if(type(i)==str):
             print(i)
         if(type(i)==float):
-            print(8*"0"+cse_to_binary(floating_to_binary(str(i))))
+            print(8*"0"+binary_to_cse(floating_to_binary(str(i))))
         if (type(i)==int):
             print(bin(i)[2:].zfill(16))
+
+
 def addf(x,y):
+    if (type(x)==int):
+        x= binary_to_float(cse_to_binary((8-len(bin(x)[2:]))*"0" + bin(x)[2:]))
+    if (type(y)==int):
+        y= binary_to_float(cse_to_binary((8-len(bin(y)[2:]))*"0" + bin(y)[2:]))
     return overflow_f(x+y)
 
 def subf(x,y):
+    if (type(x)==int):
+        x= binary_to_float(cse_to_binary((8-len(bin(x)[2:]))*"0" + bin(x)[2:]))
+    if (type(y)==int):
+        y= binary_to_float(cse_to_binary((8-len(bin(y)[2:]))*"0" + bin(y)[2:]))
     return overflow_f(y-x)
 
 def add(x,y):
@@ -116,7 +126,12 @@ def mul(x,y):
     return overflow(x*y)
 
 def Xor(x,y):
+    if(type(x)==float):
+        x=int(binary_to_cse(floating_to_binary((str(x)))),2)
+    if(type(y)==float):
+        y=int(binary_to_cse(floating_to_binary((str(y)))),2)
     return x^y
+
 def OR(x,y):
     if(type(x)==float):
         x=int(binary_to_cse(floating_to_binary((str(x)))),2)
@@ -238,7 +253,7 @@ def overflow(x):
     return x%65536
 
 def overflow_f(x):
-    if(x<0):
+    if(x<1):
         regs_val[7][0]=1
         return 0
     if(x>int("11111100",2)):
@@ -248,7 +263,11 @@ def overflow_f(x):
 
 def typea(op):
     global op_code
-    regs_val[reg_code[op[13:]]]=op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[7:10]]])
+    if type(regs_val[reg_code[op[13:]]])==float and (op_code[op[0:5]][0]!=addf and op_code[op[0:5]][0]!=subf):
+        regs_val[reg_code[op[13:]]]=binary_to_float(cse_to_binary((8-len(bin(op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[7:10]]]))[2:]))*"0"+bin(op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[7:10]]]))[2:]))
+    else:
+        regs_val[reg_code[op[13:]]]=op_code[op[0:5]][0](regs_val[reg_code[op[10:13]]],regs_val[reg_code[op[7:10]]])
+
 def typeb(op):
     if (op_code[op[0:5]][0])==movf:
         regs_val[reg_code[op[5:8]]]=op_code[op[0:5]][0](regs_val[reg_code[op[5:8]]],binary_to_float(cse_to_binary(op[8:])))
@@ -324,6 +343,7 @@ while(k<len(op)and halt!=True):
         for j in range(len(regs_val[7])):
                 regs_val[7][j]=0 
     print_regs(k)
+    #print(regs_val[2])
     if(x!=-1):
         k=x
     else:
